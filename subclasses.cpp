@@ -1,90 +1,94 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <map>
 
-class missile{
+
+
+class dynamicClass{
     static int _id;
-    int id;
-    std::string name;
-    int damage;
-    int range;
-    int type;
-    double speed;
-    int Payload;
-    double accuracy;
-    std::string coo;//country of origin
-
+    std::map<std::string, int> variables;
+    std::map<std::string, std::string> variables2;
+    //check the name exist in the variable or not
+    bool checkVariableName(const std::string& name) {
+        return variables.find(name) != variables.end()||variables2.find(name) != variables2.end();
+    }
     public:
-    missile(){
-        id=_id++;
-        name="default";
-        damage=0;
-        range=0;
-        type=0;
-        speed=0;
-        Payload=0;
-        accuracy=0;
-        coo="default";
+    void setVariable(const std::string& name, int value) {
+        if (checkVariableName(name)) {
+            std::cerr << "Variable '" << name << "' already exists." << std::endl;
+            return;
+        }
+        variables[name] = value;
     }
-    missile(std::string name,int damage,int range,int type
-        ,double speed,int Payload,double accuracy,std::string coo){
-        id=_id++;
-        this->name=name;
-        this->damage=damage;
-        this->range=range;
-        this->type=type;
-        this->speed=speed;
-        this->Payload=Payload;
-        this->accuracy=accuracy;
-        this->coo=coo;
+    void setVariable2(const std::string& name, std::string value) {
+        if (checkVariableName(name)) {
+            std::cerr << "Variable '" << name << "' already exists." << std::endl;
+            return;
+        }
+        variables2[name] = value;
     }
-    void print(){
-        //just print the missile contions manner with tab
-        std::cout<<name<<"\t"<<damage<<"\t"<<range<<"\t"<<type<<"\t"<<speed<<"\t"<<Payload<<"\t"<<accuracy<<"\t"<<coo<<std::endl;
+    int getVariable(const std::string& name) {
+        if (variables.find(name) != variables.end()) {
+            return variables[name];
+        }
+        else {
+            // std::cerr << "Variable '" << name << "' not found." << std::endl;
+            return 0; 
+        }
     }
-    friend class missileList;
+    std::string getVariable2(const std::string& name) {
+        if (variables2.find(name) != variables2.end()) {
+            return variables2[name];
+        }
+        else {
+            // std::cerr << "Variable '" << name << "' not found." << std::endl;
+            return ""; 
+        }
+    }
+    bool hasVariable1(const std::string& name) {
+        return variables.find(name) != variables.end();
+    }
+    bool hasVariable2(const std::string& name) {
+        return variables2.find(name) != variables2.end();
+    }
+    void print(std::vector<std::string> variableNames){
+        for(int i=0;i<variableNames.size();i++){
+            if(variables.find(variableNames[i])!=variables.end()){
+                std::cout<<variables[variableNames[i]]<<"\t";
+            }
+            else if(variables2.find(variableNames[i])!=variables2.end()){
+                std::cout<<variables2[variableNames[i]]<<"\t";
+            }
+            else{
+                std::cerr<<"Variable "<<variableNames[i]<<" not found"<<std::endl;
+                return;
+            }
+        }
+        std::cout << std::endl;
+    }
+    void printDetails(){
+        for (auto const& x : variables2){std::cout << x.first<<"\t";}
+        for (auto const& x : variables){std::cout << x.first<< "\t";}
+        std::cout << std::endl;
+    }
+
+    dynamicClass(){
+        setVariable("id",_id++);
+    }
+    //gives the vector of string name of vbariables of string and valuse and same for int also
+    dynamicClass(std::vector<std::string> names,std::vector<std::string> values,std::vector<int> values2){
+        setVariable("id",_id++);
+        if(names.size()!=values.size()+values2.size()){
+            std::cerr<<"Given insuffiecnt values"<<std::endl;
+            return;
+        }
+        for(int i=0;i<values.size();i++){
+            setVariable2(names[i],values[i]);
+        }
+        for(int i=0;i<values2.size();i++){
+            setVariable(names[i+values.size()],values2[i]);
+        }
+    }
 };
-int missile::_id = 0;
-
-
-// class for tanks
-class tank{
-    static int _id;
-    int id;
-    std::string name;
-    int damage;
-    int health;
-    int range;
-    double speed;
-    int Payload;
-    std::string coo;//country of origin
-
-    public:
-    tank(){
-        id=_id++;
-        name="default";
-        damage=0;
-        range=0;
-        speed=0;
-        health=0;
-        Payload=0;
-        coo="default";
-    }
-    tank(std::string name,int damage,int health,int range
-        ,double speed,int Payload,std::string coo){
-        id=_id++;
-        this->name=name;
-        this->damage=damage;
-        this->range=range;
-        this->health=health;
-        this->speed=speed;
-        this->Payload=Payload;
-        this->coo=coo;
-    }
-    void print(){
-        //just print the tank contions manner with tab
-        std::cout<<name<<"\t"<<damage<<"\t"<<health<<"\t"<<range<<"\t"<<speed<<"\t"<<Payload<<"\t"<<coo<<std::endl;
-    }
-    friend class tankList;
-};
-int tank::_id = 0;
+int dynamicClass::_id = 0;

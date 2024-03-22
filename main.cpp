@@ -2,44 +2,8 @@
 #include"classes.cpp"
 using namespace std;
 
-//print vector
-template<class T>
-void printVector(vector<T> v){
-    for(int i=0;i<v.size();i++){
-        v[i].print();
-    }
-    cout<<"\u001b[0m";
-}
 
-template<class T,class X>
-void getData(T &t,vector<string> v){
-    if(v.size()==2){
-        vector<X> temp=t.getData();
-        t.printDetails();
-        printVector(temp);
-    }
-    else if(v[2]=="by"){
-        if(v[3]=="country"){
-            vector<X> temp=t.getData(v[4]);
-            t.printDetails();
-            printVector(temp);
-        }
-        else if(v[3]=="name"){
-            vector<X> temp=t.getData(v[4],0.0);
-            t.printDetails();
-            printVector(temp);
-        }
-        else if(v[3]=="range"||v[3]=="damage"){
-            vector<X> temp;
-            t.printDetails();
-            char c=v[4][0];
-            if(v.size()>5)temp=t.getData(v[6],stoi(v[4].substr(1,v[4].size())));
-            else temp=t.getData(stoi(v[4]));
-            printVector(temp);
-        }
-
-    }
-}
+void sampleData(database &d);
 
 //extract the space separated string and store in vector
 vector<string> split(string s){
@@ -60,10 +24,10 @@ vector<string> split(string s){
     return v;
 }
 
-int main(){
-    missileList ml;
-    tankList tl;
 
+int main(){
+    database d;
+    sampleData(d);
 
     //infinte loop print > take string input > if input is "exit" break
     while(1){
@@ -74,64 +38,87 @@ int main(){
         if(input=="exit"){
             break;
         }
-        else if(input=="add missile"){
-            string name;
-            int damage,range,type,Payload;
-            double speed,accuracy;
-            string coo;
-            cout<<"Enter name: ";
-            getline(cin,name);
-            cout<<"Enter damage: ";
-            cin>>damage;
-            cout<<"Enter range: ";
-            cin>>range;
-            cout<<"Enter type: ";
-            cin>>type;
-            cout<<"Enter speed: ";
-            cin>>speed;
-            cout<<"Enter Payload: ";
-            cin>>Payload;
-            cout<<"Enter accuracy: ";
-            cin>>accuracy;
-            cout<<"Enter country of origin: ";
-            cin>>coo;
-            ml.addMissile(name,damage,range,type,speed,Payload,accuracy,coo);
-        }
-        else if(input=="add tank"){
-            string name;
-            int damage,health,range,Payload;
-            double speed;
-            string coo;
-            cout<<"Enter name: ";
-            cin>>name;
-            cout<<"Enter damage: ";
-            cin>>damage;
-            cout<<"Enter health: ";
-            cin>>health;
-            cout<<"Enter range: ";
-            cin>>range;
-            cout<<"Enter speed: ";
-            cin>>speed;
-            cout<<"Enter Payload: ";
-            cin>>Payload;
-            cout<<"Enter country of origin: ";
-            cin>>coo;
-            tl.addTank(name,damage,health,range,speed,Payload,coo);
-        }
-        //split the input by space and store
         vector<string> v=split(input);
-
-
-        if(v[0]=="get"){
-            if(v[1]=="tank"){
-                getData<tankList,tank>(tl,v);
-            }
-            else if(v[1]=="missile"){
-                getData<missileList,missile>(ml,v);
-            }
+        if(v[0]=="create"){
+            d.createClass(v[1]); 
         }
-
+        else if(v[0]=="add"){
+            d.addObject(v[1]);
+        }
+        else if(v[0]=="list"){
+            d.getData(v);
+        }
+        else{
+            cout<<"\u001b[31mInvalid command\u001b[0m\n";
+        }
     }
 
     return 0;
+}
+
+
+void sampleData(database &d){
+    //create vector of string tank data
+    vector<string> temp;
+    temp.push_back("string");
+    temp.push_back("int");
+    temp.push_back("int");
+    temp.push_back("int");
+    temp.push_back("string");
+    vector<string> temp2;
+    temp2.push_back("name");
+    temp2.push_back("damage");
+    temp2.push_back("health");
+    temp2.push_back("speed");
+    temp2.push_back("country");
+    d.createClass("tank",temp2,temp);
+    //create vector of string tank data object
+    map<string, string> v;
+    v["name"]="tiger";
+    v["damage"]="100";
+    v["health"]="1000";
+    v["speed"]="50";
+    v["country"]="germany";
+    d.addObject("tank",v);
+    v["name"]="panther";
+    v["damage"]="80";
+    v["health"]="800";
+    v["speed"]="60";
+    v["country"]="germany";
+    d.addObject("tank",v);
+    v["name"]="sherman";
+    v["damage"]="50";
+    v["health"]="500";
+    v["speed"]="70";
+    v["country"]="usa";
+    d.addObject("tank",v);
+
+    //add data of missile with country of origin
+    temp.clear();
+    temp.push_back("string");
+    temp.push_back("int");
+    temp.push_back("int");
+    temp.push_back("string");
+    temp2.clear();
+    temp2.push_back("name");
+    temp2.push_back("damage");
+    temp2.push_back("speed");
+    temp2.push_back("country");
+    d.createClass("missile",temp2,temp);
+    v.clear();
+    v["name"]="scud";
+    v["damage"]="100";
+    v["speed"]="1000";
+    v["country"]="russia";
+    d.addObject("missile",v);
+    v["name"]="patriot";
+    v["damage"]="80";
+    v["speed"]="800";
+    v["country"]="usa";
+    d.addObject("missile",v);
+    v["name"]="brahmos";
+    v["damage"]="50";
+    v["speed"]="500";
+    v["country"]="india";
+    d.addObject("missile",v);
 }
