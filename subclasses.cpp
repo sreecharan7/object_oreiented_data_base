@@ -72,6 +72,20 @@ class dynamicClass{
         for (auto const& x : variables){std::cout << x.first<< "\t";}
         std::cout << std::endl;
     }
+    void update(std::map<std::string,std::string> values){
+        for (auto const& x : values){
+            if(variables2.find(x.first)!=variables2.end()){
+                variables2[x.first]=x.second;
+            }
+            else if(variables.find(x.first)!=variables.end()){
+                variables[x.first]=stoi(x.second);
+            }
+            else{
+                std::cerr<<"Variable "<<x.first<<" not found"<<std::endl;
+                return;
+            }
+        }
+    }
 
     dynamicClass(){
         setVariable("id",_id++);

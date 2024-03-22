@@ -39,6 +39,7 @@ int main(){
             break;
         }
         vector<string> v=split(input);
+        try{
         if(v[0]=="create"){
             d.createClass(v[1]); 
         }
@@ -48,8 +49,18 @@ int main(){
         else if(v[0]=="list"){
             d.getData(v);
         }
+        else if(v[0]=="delete"){
+            d.deleteData(v);
+        }
+        else if(v[0]=="update"){
+            d.updateData(v);
+        }
         else{
             cout<<"\u001b[31mInvalid command\u001b[0m\n";
+        }
+        }
+        catch(const char* msg){
+            cout<<msg<<endl;
         }
     }
 

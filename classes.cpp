@@ -78,8 +78,7 @@ class dynamicClassVector{
             return temp;
         }
         //check the name is int or string
-
-        if(variables[name]=="int"&&all_of(value.begin(), value.end(), ::isdigit)){
+        if(variables[name]=="int"&&all_of(value.begin(), value.end(), ::isdigit)||name=="id"){
             int num=stoi(value);
             for(int i=0;i<vec.size();i++){
                 switch(op){
@@ -130,19 +129,51 @@ class dynamicClassVector{
         return temp;
     }
     //delete the vector of dynamic class
-    // int deleteObjects(vector<dynamicClass> temp){
-    //     int count=0;
-    //     for(int i=0;i<temp.size();i++){
-    //         for(int j=0;j<vec.size();j++){
-    //             if(temp[i].id==vec[j].id){
-    //                 vec.erase(vec.begin()+j);
-    //                 count++;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //     return count;
-    // }
+    int deleteObjects(vector<dynamicClass> temp){
+        int count=0;
+        for(int i=0;i<temp.size();i++){
+            for(int j=0;j<vec.size();j++){
+                if(temp[i].getVariable("id")==vec[j].getVariable("id")){
+                    // delete &vec[j];
+                    vec.erase(vec.begin()+j);
+                    count++;
+                    break;
+                }
+            }
+        }
+        return count;
+    }
+    //update the vector of dynamic class
+    int updateObjects(vector<dynamicClass> temp,map<string, string> v){
+        int count=0;
+        //check map variable is valid or not
+        for (auto const& x : v){
+            if(variables.find(x.first)==variables.end()){
+                std::cerr<<"Variable "<<x.first<<" not found"<<std::endl;
+                return count;
+            }
+            if(variables[x.first]=="int"&&all_of(x.second.begin(), x.second.end(), ::isdigit)){
+                continue;
+            }
+            else if(variables[x.first]=="string"){
+                continue;
+            }
+            else{
+                std::cerr<<"Invalid input for "<<x.first<<std::endl;
+                return count;
+            }
+        }
+        for(int i=0;i<temp.size();i++){
+            for(int j=0;j<vec.size();j++){
+                if(temp[i].getVariable("id")==vec[j].getVariable("id")){
+                    vec[j].update(v);
+                    count++;
+                    break;
+                }
+            }
+        }
+        return count;
+    }
     void printDetails(){
         cout<<"\u001b[33mid\t";
         for(int i=0;i<variableNames.size();i++){
@@ -165,6 +196,30 @@ class database{
     }
     bool checkClass(string name){
         return classes.find(name) != classes.end();
+    }
+    map<string,string> extractData(vector<string> v, int s){
+            map<string, string> temp2;
+            //untill it found , it will go to next element a = sree , b = sree
+            string str1="",str2="";
+            for(int i=s;i<v.size();i++){
+                if(v[i]=="="){
+                    str2=str1;
+                    str1="";
+                }
+                else if(v[i]==","){
+                    temp2[str2]=str1;
+                    str1="";
+                    str2="";
+                }
+                else{
+                    if(str1!=""){str1+=" ";}
+                    str1+=v[i];
+                }
+            }
+            if(str1!=""){
+                temp2[str2]=str1;
+            }
+            return temp2;
     }
     public:
     void createClass(string name){
@@ -192,8 +247,9 @@ class database{
             string vtype;
             getline(cin,vtype);
             //check string is 3emprty vname or not
-            if((vtype=="int"||vtype=="string")&&!vname.empty()){temp.push_back(vname);temp2.push_back(vtype);}
-            else{cout<<"\u001b[31mInvalid type try again or string is empty\u001b[0m\n";}
+            if(vname=="id"&&!vname.empty()){cout<<"\u001b[31mInvalid variable name or vname is empty\u001b[0m\n";}
+            else if(vtype=="int"||vtype=="string"){temp.push_back(vname);temp2.push_back(vtype);}
+            else{cout<<"\u001b[31mInvalid type try again\u001b[0m\n";}
         }     
     }
     void createClass(string name,vector<string> temp,vector<string> temp2){
@@ -248,6 +304,59 @@ class database{
             vector<dynamicClass> temp=d->getdata(v[3],v[5],v[4][0]);
             d->printDetails();
             printVector(temp,d->variableNames);
+        }
+        else{
+            cout<<"\u001b[31mInvalid input\u001b[0m\n";
+        }
+    }
+
+    void deleteData(vector<string> v){
+        if(v.size()==2){
+            if(!checkClass(v[1])){
+                cout<<"\u001b[31mClass not found\u001b[0m\n";
+                return;
+            }
+            dynamicClassVector *d=classes[v[1]];
+            vector<dynamicClass> temp=d->getdata();
+            int count=d->deleteObjects(temp);
+            cout<<"\u001b[32m"<<count<<" objects deleted\u001b[0m\n";
+        }
+        else if(v.size()==6&&v[2]=="by"){
+            if(!checkClass(v[1])){
+                cout<<"\u001b[31mClass not found\u001b[0m\n";
+                return;
+            }
+            dynamicClassVector *d=classes[v[1]];
+            vector<dynamicClass> temp=d->getdata(v[3],v[5],v[4][0]);
+            int count=d->deleteObjects(temp);
+            cout<<"\u001b[32m"<<count<<" objects deleted\u001b[0m\n";
+        }
+        else{
+            cout<<"\u001b[31mInvalid input\u001b[0m\n";
+        }
+    }
+    void updateData(vector<string> v){
+        if(v.size()>3&&v[2]=="all"){
+            if(!checkClass(v[1])){
+                cout<<"\u001b[31mClass not found\u001b[0m\n";
+                return;
+            }
+            dynamicClassVector *d=classes[v[1]];
+            vector<dynamicClass> temp=d->getdata();
+            map<string, string> temp2=extractData(v,3);
+            int count=d->updateObjects(temp,temp2);
+            cout<<"\u001b[32m"<<count<<" objects updated\u001b[0m\n";
+        }
+        else if(v.size()>4&&v[2]=="by"){
+            if(!checkClass(v[1])){
+                cout<<"\u001b[31mClass not found\u001b[0m\n";
+                return;
+            }
+            dynamicClassVector *d=classes[v[1]];
+            vector<dynamicClass> temp=d->getdata(v[3],v[5],v[4][0]);
+            map<string, string> temp2=extractData(v,7);
+            int count=d->updateObjects(temp,temp2);
+            cout<<"\u001b[32m"<<count<<" objects updated\u001b[0m\n";
         }
         else{
             cout<<"\u001b[31mInvalid input\u001b[0m\n";
