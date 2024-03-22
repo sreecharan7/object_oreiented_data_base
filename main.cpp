@@ -60,7 +60,7 @@ int main(){
         }
         }
         catch(const char* msg){
-            cout<<msg<<endl;
+            cout<<"error happened"<<endl;
         }
     }
 

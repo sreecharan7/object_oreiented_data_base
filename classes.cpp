@@ -38,6 +38,16 @@ class dynamicClassVector{
         //take key and store in variableNames
         for (auto const& x : variables){variableNames.push_back(x.first);}
     }
+    //chck the vector of variableNames is valid or not
+    bool checkVariableNames(vector<string> v){
+        for(int i=0;i<v.size();i++){
+            if(variables.find(v[i])==variables.end()){
+                std::cerr<<"Variable "<<v[i]<<" not found"<<std::endl;
+                return false;
+            }
+        }
+        return true;
+    }
     void addClass( std::map<std::string, std::string> v){
         vector<string> temp1;
         vector<int> temp2;
@@ -221,6 +231,39 @@ class database{
             }
             return temp2;
     }
+    vector<string> extractData2(vector<string> v, int s){
+        vector<string> temp2;
+        //untill it found , it will go to next element a  , b
+        string str1="";
+        for(int i=s;i<v.size();i++){
+            if(v[i]==","){
+                temp2.push_back(str1);
+                str1="";
+            }
+            else{
+                if(str1!=""){str1+=" ";}
+                str1+=v[i];
+            }
+        }
+        if(str1!=""){
+            temp2.push_back(str1);
+        }
+        return temp2;
+    }
+    void printWithVaraiblesNames(vector<dynamicClass> temp,vector<string> temp2,dynamicClassVector *d){
+        if(!d->checkVariableNames(temp2)){
+            cout<<"\u001b[31mInvalid variable name\u001b[0m\n";
+        }
+        else{
+            //print temp2
+            cout<<"\u001b[33mid\t";
+            for(int i=0;i<temp2.size();i++){
+                cout<<temp2[i]<<"\t";
+            }
+            cout<<"\u001b[36m"<<endl;
+            printVector(temp,temp2);
+        }
+    }
     public:
     void createClass(string name){
         if(checkClass(name)){
@@ -285,25 +328,35 @@ class database{
     }
 
     void getData(vector<string> v){
-        if(v.size()==2){
+        if(v.size()==2||(v.size()>=3&&v[2]=="all")){
             if(!checkClass(v[1])){
                 cout<<"\u001b[31mClass not found\u001b[0m\n";
                 return;
             }
             dynamicClassVector *d=classes[v[1]];
             vector<dynamicClass> temp=d->getdata();
-            d->printDetails();
-            printVector(temp,d->variableNames);
+            if(v.size()>3&&v[3]=="with"){
+                vector<string> temp2=extractData2(v,4);
+                printWithVaraiblesNames(temp,temp2,d);
+            }else{
+                d->printDetails();
+                printVector(temp,d->variableNames);
+            }
         }
-        else if(v.size()==6&&v[2]=="by"){
+        else if(v.size()>=6&&v[2]=="by"){
             if(!checkClass(v[1])){
                 cout<<"\u001b[31mClass not found\u001b[0m\n";
                 return;
             }
             dynamicClassVector *d=classes[v[1]];
             vector<dynamicClass> temp=d->getdata(v[3],v[5],v[4][0]);
-            d->printDetails();
-            printVector(temp,d->variableNames);
+            if(v.size()>6&&v[6]=="with"){
+                vector<string> temp2=extractData2(v,7);
+                printWithVaraiblesNames(temp,temp2,d);
+            }else{
+                d->printDetails();
+                printVector(temp,d->variableNames);
+            }
         }
         else{
             cout<<"\u001b[31mInvalid input\u001b[0m\n";
@@ -343,7 +396,7 @@ class database{
             }
             dynamicClassVector *d=classes[v[1]];
             vector<dynamicClass> temp=d->getdata();
-            map<string, string> temp2=extractData(v,3);
+            map<string, string> temp2=extractData(v,4);
             int count=d->updateObjects(temp,temp2);
             cout<<"\u001b[32m"<<count<<" objects updated\u001b[0m\n";
         }
@@ -362,5 +415,4 @@ class database{
             cout<<"\u001b[31mInvalid input\u001b[0m\n";
         }
     }
-
 };
