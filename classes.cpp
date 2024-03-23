@@ -222,7 +222,6 @@ class database{
                     str2="";
                 }
                 else{
-                    if(str1!=""){str1+=" ";}
                     str1+=v[i];
                 }
             }

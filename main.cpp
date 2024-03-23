@@ -6,11 +6,11 @@ using namespace std;
 void sampleData(database &d);
 
 //extract the space separated string and store in vector
-vector<string> split(string s){
+vector<string> split(string s,char d=' '){
     vector<string> v;
     string temp="";
     for(int i=0;i<s.size();i++){
-        if(s[i]==' '||s[i]=='\n'||s[i]=='\t'){
+        if(s[i]==d||s[i]=='\n'||s[i]=='\t'){
             if(temp!=""){
                 v.push_back(temp);
             }
@@ -29,6 +29,7 @@ int main(){
     database d;
     sampleData(d);
 
+    char delimeter=' ';
     //infinte loop print > take string input > if input is "exit" break
     while(1){
         string input;
@@ -38,7 +39,7 @@ int main(){
         if(input=="exit"){
             break;
         }
-        vector<string> v=split(input);
+        vector<string> v=split(input,delimeter);
         try{
         if(v[0]=="create"){
             d.createClass(v[1]); 
@@ -54,6 +55,14 @@ int main(){
         }
         else if(v[0]=="update"){
             d.updateData(v);
+        }
+        else if(v[0]=="delimeter"){
+            if(v.size()==3&&v[1]=="="){
+                delimeter=v[2][0];
+            }
+            else{
+                delimeter=' ';
+            }
         }
         else{
             cout<<"\u001b[31mInvalid command\u001b[0m\n";
