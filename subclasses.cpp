@@ -2,7 +2,7 @@
 #include <string>
 #include <iostream>
 #include <map>
-
+#include <algorithm> 
 
 
 class dynamicClass{
@@ -72,6 +72,13 @@ class dynamicClass{
         for (auto const& x : variables){std::cout << x.first<< "\t";}
         std::cout << std::endl;
     }
+    void printTotal(){
+        std::cout <<"\u001b[33m{\u001b[0m"<<std::endl;
+        for (auto const& x : variables2){std::cout <<"\u001b[33m\t"<< x.first<<"\u001b[0m : \u001b[34m"<<x.second<<"\u001b[0m\n";}
+        for (auto const& x : variables){std::cout <<"\u001b[33m\t"<< x.first<<"\u001b[0m : \u001b[34m"<<x.second<<"\u001b[0m\n";}
+        std::cout <<"\u001b[33m},\u001b[0m"<<std::endl;
+        std::cout << std::endl;
+    }
     void update(std::map<std::string,std::string> values){
         for (auto const& x : values){
             if(variables2.find(x.first)!=variables2.end()){
@@ -104,5 +111,20 @@ class dynamicClass{
             setVariable(names[i+values.size()],values2[i]);
         }
     }
+    //gives the map of string name of vbariables of string and valuse and same for int also
+    dynamicClass(std::vector<std::string> names,std::vector<std::string> values){
+        setVariable("id",_id++);
+        if(names.size()!=values.size()){
+            std::cerr<<"Given insuffiecnt values"<<std::endl;
+            return;
+        }
+        for(int i=0;i<values.size();i++){
+            if(all_of(values[i].begin(), values[i].end(), ::isdigit)){
+                setVariable(names[i],stoi(values[i]));
+            }else{
+                setVariable2(names[i],values[i]);
+            }
+        }
+     }
 };
 int dynamicClass::_id = 0;

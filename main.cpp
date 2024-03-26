@@ -4,6 +4,7 @@ using namespace std;
 
 
 void sampleData(database &d);
+void nosql(database2 &d,char delimeter);
 
 //extract the space separated string and store in vector
 vector<string> split(string s,char d=' '){
@@ -27,6 +28,7 @@ vector<string> split(string s,char d=' '){
 
 int main(){
     database d;
+    database2 nd;
     sampleData(d);
 
     char delimeter=' ';
@@ -64,6 +66,9 @@ int main(){
                 delimeter=' ';
             }
         }
+        else if(v[0]=="nosql"){
+            nosql(nd,delimeter);
+        }
         else{
             cout<<"\u001b[31mInvalid command\u001b[0m\n";
         }
@@ -75,6 +80,47 @@ int main(){
 
     return 0;
 }
+
+void nosql(database2 &d,char delimeter){
+    string current="nosql";
+    string input;
+    while(1){
+        cout<<current<<">";
+        getline(cin,input);
+        if(input=="exit"){
+            break;
+        }
+        vector<string> v=split(input,delimeter);
+        try{
+            if(v[0]=="create"){
+                d.addCollection(v);
+            }
+            else if(v[0]=="add"){
+                d.addObject(v);
+            }
+            else if(v[0]=="list"){
+                d.listData(v);
+            }
+            else{
+                cout<<"\u001b[31mInvalid command\u001b[0m\n";
+            }
+        }catch(const char* msg){
+            cout<<"error happened"<<endl;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 void sampleData(database &d){

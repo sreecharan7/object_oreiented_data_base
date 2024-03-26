@@ -415,3 +415,88 @@ class database{
         }
     }
 };
+
+//no sql
+class database2{
+    //map of vector of dynameic class
+    map<string, vector<dynamicClass>> classes;
+    public:
+    void addCollection(vector<string> v){
+        if(v.size()>1){
+            //check the class exist or not
+            if(classes.find(v[1])!=classes.end()){
+                cout<<"\u001b[31mCollection is aldready exist\u001b[0m\n";
+                return;
+            }
+            else{
+                classes[v[1]];
+                cout<<"\u001b[32mcreated "<<v[1]<<" collection\u001b[0m\n";
+            }
+        }
+        else{
+            //error
+            cout<<"\u001b[31mInvalid input\u001b[0m\n";
+        }
+    }
+    void addObject(vector<string> v){
+        if(v.size()>1){
+            //check the class exist or not
+            if(classes.find(v[1])!=classes.end()){
+                vector<string> vvname;
+                vector<string> vvvalue;
+                while(1){
+                    string vname,vvalue;
+                    cout<<"\u001b[36mEnter the name of the variable :\u001b[0m";
+                    getline(cin,vname);
+                    if(vname=="/stop"){
+                        break;
+                    }
+                    cout<<"\u001b[36mEnter the value of the variable ("<<vname<<") :\u001b[0m";
+                    getline(cin,vvalue);
+                    if(vname.empty()||vvalue.empty()){
+                        cout<<"\u001b[31mVariable name or value is empty\u001b[0m\n";
+                        continue;
+                    }
+                    vvname.push_back(vname);
+                    vvvalue.push_back(vvalue);
+                }
+                if(vvname.size()==0){
+                    cout<<"\u001b[31mNo variable found\u001b[0m\n";
+                    return;
+                }
+                dynamicClass d(vvname,vvvalue);
+                classes[v[1]].push_back(d);
+            }
+            else{
+                cout<<"\u001b[31mCollection not found\u001b[0m\n";
+            }
+        }
+        else{
+            //error
+            cout<<"\u001b[31mInvalid input\u001b[0m\n";
+        }
+    }
+    vector<dynamicClass> getData(string name,string value,string collection,char op='='){
+        vector<dynamicClass> temp;
+        if(classes.find(collection)==classes.end()){
+            cout<<"\u001b[31mCollection not found\u001b[0m\n";
+            return temp;
+        }
+        // if(all)
+        return temp;
+    }
+    void listData(vector<string> v){
+        if(v.size()>1){
+            if(classes.find(v[1])==classes.end()){
+                cout<<"\u001b[31mCollection not found\u001b[0m\n";
+            }
+            for(int i=0;i<classes[v[1]].size();i++){
+                classes[v[1]][i].printTotal();
+            }
+        }
+        else{
+            //error
+            cout<<"\u001b[31mInvalid input\u001b[0m\n";
+        }
+    }
+};
