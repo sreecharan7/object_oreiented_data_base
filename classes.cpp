@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <map>
 #include <algorithm> 
 
@@ -249,6 +250,13 @@ class database{
         }
         return temp2;
     }
+    
+    
+
+
+
+
+
     void printWithVaraiblesNames(vector<dynamicClass> temp,vector<string> temp2,dynamicClassVector *d){
         if(!d->checkVariableNames(temp2)){
             cout<<"\u001b[31mInvalid variable name\u001b[0m\n";
@@ -361,6 +369,138 @@ class database{
             cout<<"\u001b[31mInvalid input\u001b[0m\n";
         }
     }
+
+
+void saveData(const std::string& filename) {
+    std::ofstream outFile(filename, std::ios::binary);
+    if (outFile.is_open()) {
+        // Write the number of classes
+        size_t numClasses = classes.size();
+        outFile.write(reinterpret_cast<char*>(&numClasses), sizeof(size_t));
+
+        // Iterate over the classes
+        for (const auto& classEntry : classes) {
+            // Write the class name
+            const std::string& className = classEntry.first;
+            size_t classNameLength = className.length();
+            outFile.write(reinterpret_cast<const char*>(&classNameLength), sizeof(size_t));
+            outFile.write(className.c_str(), classNameLength);
+
+            // Write the variable names and types
+            dynamicClassVector* classVector = classEntry.second;
+            size_t numVariables = classVector->variableNames.size();
+            outFile.write(reinterpret_cast<char*>(&numVariables), sizeof(size_t));
+            for (const auto& variableName : classVector->variableNames) {
+                const std::string& variableType = classVector->variables[variableName];
+                size_t variableNameLength = variableName.length();
+                size_t variableTypeLength = variableType.length();
+                outFile.write(reinterpret_cast<const char*>(&variableNameLength), sizeof(size_t));
+                outFile.write(variableName.c_str(), variableNameLength);
+                outFile.write(reinterpret_cast<const char*>(&variableTypeLength), sizeof(size_t));
+                outFile.write(variableType.c_str(), variableTypeLength);
+            }
+
+            // Write the objects
+            size_t numObjects = classVector->vec.size();
+            outFile.write(reinterpret_cast<char*>(&numObjects), sizeof(size_t));
+            for (const auto& obj : classVector->vec) {
+                for (const auto& variableName : classVector->variableNames) {
+                    const std::string& variableType = classVector->variables[variableName];
+                    if (variableType == "int") {
+                        int value = obj.getVariable(variableName);
+                        outFile.write(reinterpret_cast<const char*>(&value), sizeof(int));
+                    } else if (variableType == "string") {
+                        const std::string& value = obj.getVariable2(variableName);
+                        size_t valueLength = value.length();
+                        outFile.write(reinterpret_cast<const char*>(&valueLength), sizeof(size_t));
+                        outFile.write(value.c_str(), valueLength);
+                    }
+                }
+            }
+        }
+
+        outFile.close();
+        std::cout << "Data saved to file: " << filename << std::endl;
+    } else {
+        std::cerr << "Unable to open file for writing: " << filename << std::endl;
+    }
+}
+
+   void loadData(const std::string& filename) {
+    std::ifstream inFile(filename, std::ios::binary);
+    if (inFile.is_open()) {
+        // Clear existing data
+        for (auto& classEntry : classes) {
+            delete classEntry.second;
+        }
+        classes.clear();
+
+        // Read the number of classes
+        size_t numClasses;
+        inFile.read(reinterpret_cast<char*>(&numClasses), sizeof(size_t));
+
+        // Read the classes
+        for (size_t i = 0; i < numClasses; ++i) {
+            // Read the class name
+            size_t classNameLength;
+            inFile.read(reinterpret_cast<char*>(&classNameLength), sizeof(size_t));
+            std::string className(classNameLength, '\0');
+            inFile.read(&className[0], classNameLength);
+
+            // Read the variable names and types
+            std::vector<std::string> variableNames;
+            std::vector<std::string> variableTypes;
+            size_t numVariables;
+            inFile.read(reinterpret_cast<char*>(&numVariables), sizeof(size_t));
+            for (size_t j = 0; j < numVariables; ++j) {
+                size_t variableNameLength, variableTypeLength;
+                inFile.read(reinterpret_cast<char*>(&variableNameLength), sizeof(size_t));
+                std::string variableName(variableNameLength, '\0');
+                inFile.read(&variableName[0], variableNameLength);
+                inFile.read(reinterpret_cast<char*>(&variableTypeLength), sizeof(size_t));
+                std::string variableType(variableTypeLength, '\0');
+                inFile.read(&variableType[0], variableTypeLength);
+                variableNames.push_back(variableName);
+                variableTypes.push_back(variableType);
+            }
+
+            // Create the dynamicClassVector
+            dynamicClassVector* classVector = new dynamicClassVector(variableNames, variableTypes);
+            classes[className] = classVector;
+
+            // Read the objects
+            size_t numObjects;
+            inFile.read(reinterpret_cast<char*>(&numObjects), sizeof(size_t));
+            for (size_t j = 0; j < numObjects; ++j) {
+                std::vector<std::string> names, values;
+                for (size_t k = 0; k < numVariables; ++k) {
+                    const std::string& variableType = variableTypes[k];
+                    if (variableType == "int") {
+                        int value;
+                        inFile.read(reinterpret_cast<char*>(&value), sizeof(int));
+                        names.push_back(variableNames[k]);
+                        values.push_back(std::to_string(value));
+                    } else if (variableType == "string") {
+                        size_t valueLength;
+                        inFile.read(reinterpret_cast<char*>(&valueLength), sizeof(size_t));
+                        std::string value(valueLength, '\0');
+                        inFile.read(&value[0], valueLength);
+                        names.push_back(variableNames[k]);
+                        values.push_back(value);
+                    }
+                }
+                classVector->vec.emplace_back(names, values);
+            }
+        }
+
+        inFile.close();
+        std::cout << "Data loaded from file: " << filename << std::endl;
+    } else {
+        std::cerr << "Unable to open file for reading: " << filename << std::endl;
+    }
+}
+
+
 
     void deleteData(vector<string> v){
         if(v.size()==2){

@@ -69,6 +69,21 @@ int main(){
         else if(v[0]=="nosql"){
             nosql(nd,delimeter);
         }
+
+         else if (v[0] == "save") {
+                if (v.size() > 0) {
+                    d.saveData(v[1]);
+                } else {
+                    cout << "\u001b[31mInvalid input. Usage: save <filename>\u001b[0m\n";
+                }
+            }
+             else if (v[0] == "load") {
+                if (v.size() > 0) {
+                    d.loadData(v[1]);
+                } else {
+                    cout << "\u001b[31mInvalid input. Usage: load <filename>\u001b[0m\n";
+                }
+            }
         else{
             cout<<"\u001b[31mInvalid command\u001b[0m\n";
         }

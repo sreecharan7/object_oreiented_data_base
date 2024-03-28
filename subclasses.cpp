@@ -28,28 +28,26 @@ class dynamicClass{
         }
         variables2[name] = value;
     }
-    int getVariable(const std::string& name) {
-        if (variables.find(name) != variables.end()) {
-            return variables[name];
-        }
-        else {
-            // std::cerr << "Variable '" << name << "' not found." << std::endl;
-            return 0; 
-        }
+    int getVariable(const std::string& name) const {
+    if (variables.find(name) != variables.end()) {
+        return variables.at(name);
+    } else {
+        // std::cerr << "Variable '" << name << "' not found." << std::endl;
+        return 0;
     }
-    std::string getVariable2(const std::string& name) {
-        if (variables2.find(name) != variables2.end()) {
-            return variables2[name];
-        }
-        else {
-            // std::cerr << "Variable '" << name << "' not found." << std::endl;
-            return ""; 
-        }
+}
+  std::string getVariable2(const std::string& name) const {
+    if (variables2.find(name) != variables2.end()) {
+        return variables2.at(name);
+    } else {
+        // std::cerr << "Variable '" << name << "' not found." << std::endl;
+        return "";
     }
-    bool hasVariable1(const std::string& name) {
+}
+    bool hasVariable1(const std::string& name)const {
         return variables.find(name) != variables.end();
     }
-    bool hasVariable2(const std::string& name) {
+    bool hasVariable2(const std::string& name) const {
         return variables2.find(name) != variables2.end();
     }
     void print(std::vector<std::string> variableNames){
